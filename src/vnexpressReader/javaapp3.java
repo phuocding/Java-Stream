@@ -7,7 +7,6 @@ package vnexpressReader;
 
 import java.io.*;
 import java.net.*;
-import java.nio.file.*;
 
 /**
  *
@@ -16,26 +15,47 @@ import java.nio.file.*;
 public class javaapp3 {
 
     public static void main(String[] args) throws MalformedURLException, IOException {
-        URL oracle = new URL("https://vnexpress.net");
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(oracle.openStream()))) {
+        try {
+            URL oracle = new URL("https://vnexpress.net");
             StringBuilder strB = new StringBuilder();
-            String inputLine;
-            File newFile = new File("./src/savePage/index.html");
-            while ((inputLine = in.readLine()) != null) {
-                strB.append(inputLine);
-                strB.append("\n");
-            }
-            System.out.println(strB.toString());
-            
-            if (!newFile.exists()) {
-                newFile.createNewFile();
+            try (BufferedReader in = new BufferedReader(
+                    new InputStreamReader(oracle.openStream()))) {
+                String inputLine;
+                File newFile = new File("./src/savePage/index.html");
+                while ((inputLine = in.readLine()) != null) {
+                    strB.append(inputLine);
+                    strB.append("\n");
+                }
             }
 
-            FileWriter fw = new FileWriter(newFile.getAbsoluteFile(), true);
+            String directoryName = "./src/savePage";
+            File directory = new File(directoryName);
+            if (!directory.exists()) {
+                directory.mkdir();
+            }
+
+            File[] listOfFiles = directory.listFiles();
+            int count = 0;
+            for (File f : listOfFiles) {
+                String strCount = f.getName().replace(".html", "").replace("index", "");
+                try {
+                    int currrentNumber = Integer.parseInt(strCount);
+                    if (currrentNumber > count) {
+                        count = currrentNumber;
+                    }
+                } catch (NumberFormatException e) {
+                }
+            }
+            String fileName = "index" + (count + 1) + ".html";
+            File file = new File(directoryName + "/" + fileName);
+
+            FileWriter fw = new FileWriter(file);
             BufferedWriter bw = new BufferedWriter(fw);
             bw.write(strB.toString());
-            bw.close();            
+            bw.close();
+            fw.close();
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
     }
 }
